@@ -272,6 +272,27 @@
   renderCountControls();
   renderDice(Array.from({ length: diceCount }, () => 6));
 
+  // Не даём экрану гаснуть, пока приложение на экране.
+  // Система снимает блокировку, когда вкладка скрыта, — берём её заново при возврате.
+  let wakeLock = null;
+  let wakeLockPending = false;
+  async function keepScreenOn() {
+    if (!('wakeLock' in navigator) || wakeLock || wakeLockPending) return;
+    if (document.visibilityState !== 'visible') return;
+    wakeLockPending = true;
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } catch (e) {
+      // Отказ (например, режим энергосбережения) — попробуем при следующем касании
+    } finally {
+      wakeLockPending = false;
+    }
+  }
+  document.addEventListener('visibilitychange', keepScreenOn);
+  document.addEventListener('pointerdown', keepScreenOn, { passive: true });
+  keepScreenOn();
+
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }

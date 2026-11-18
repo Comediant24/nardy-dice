@@ -1,5 +1,5 @@
 // При изменении файлов приложения увеличивай версию — старый кэш удалится.
-const CACHE = 'nardy-dice-v2';
+const CACHE = 'nardy-dice-v3';
 const ASSETS = [
   './',
   './index.html',
